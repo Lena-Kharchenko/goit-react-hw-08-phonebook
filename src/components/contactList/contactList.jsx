@@ -1,21 +1,17 @@
-import { useSelector } from 'react-redux';
-// import { deleteContact } from 'redux/contactSlice';
-// import { useDispatch } from 'react-redux';
 import Notiflix from 'notiflix';
 import css from './contactList.module.css';
-import {
-  useGetContactsQuery,
-  useDeleteContactsMutation,
-} from 'redux/contactsApi';
-import { selectFilterField } from 'redux/selectors';
+import { getContacts, selectFilterField } from 'redux/selectors';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteContacts, fetchContacts } from 'redux/operations';
+import { useEffect } from 'react';
 
 export default function ContactList() {
-  // const contactsRedux = useSelector(state => state.contacts);
-  // const filterRedux = useSelector(state => state.filters);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
 
-  const { data: contacts, isLoading } = useGetContactsQuery();
-  const [func] = useDeleteContactsMutation();
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   const filterValue = useSelector(selectFilterField);
 
@@ -24,24 +20,13 @@ export default function ContactList() {
       contact.name.toLowerCase().includes(filterValue)
     );
 
-  // const onDeleteContact = e => {
-  //   dispatch(deleteContact(e.target.id));
-  //   Notiflix.Notify.success(`The contact has been successfully deleted`);
-  // };
-
-  // const visibleContacts = filterRedux
-  //   ? contactsRedux.filter(contact => contact.name.includes(filterRedux))
-  //   : contactsRedux;
-
   return (
     <>
-      {/* {visibleContacts.length === 0 ? (
-        <div>Empty</div>
-      ) : ( */}
-      {isLoading ? <div>Loading...</div> : ''}
-      <ul>
-        {!isLoading &&
-          filteredContacts().map(({ name, phone, id }) => (
+      {contacts.length === 0 ? (
+        <div>You haven't contacts</div>
+      ) : (
+        <ul>
+          {filteredContacts().map(({ name, phone, id }) => (
             <li key={id}>
               <span className={css.name}> {name}:</span>
               <span className={css.number}>{phone}</span>
@@ -50,14 +35,15 @@ export default function ContactList() {
                 id={id}
                 onClick={() => {
                   Notiflix.Notify.success(`You delete contact`);
-                  func(id);
+                  dispatch(deleteContacts(id));
                 }}
               >
                 Delete
               </button>
             </li>
           ))}
-      </ul>
+        </ul>
+      )}
     </>
   );
 }
