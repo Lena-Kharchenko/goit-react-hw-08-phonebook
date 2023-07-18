@@ -1,59 +1,52 @@
-// import { useState, useEffect, useMemo } from 'react';
-import ContactForm from './contactForm/contactForm';
-import ContactList from './contactList/contactList';
-import ContactFilter from './contactFilter/contactFilter';
-// import Notiflix from 'notiflix';
-// import contactsList from 'savedContactList/savedContactList';
+import { Route, Routes } from 'react-router-dom';
+import { SignUp } from '../pages/SignUp/signUp';
+import { SharedLayout } from './sharedLayout/sharedLayout';
+import { Home } from '../pages/Home/home';
+import { Login } from '../pages/Login/login';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { refreshUser } from 'redux/operations';
+import { Contacts } from 'pages/Contacts/contacts';
+import { PrivateRoute } from './PrivateRoute';
+import { PageNotFound } from 'pages/pageNotFound';
+import { RestrictedRoute } from './RestrictedRoute';
 
-export default function App() {
-  // const [contacts, setContacts] = useState(
-  //   () => JSON.parse(window.localStorage.getItem('contacts')) ?? contactsList
-  // );
+export const App = () => {
+  const dispatch = useDispatch();
+  const isrefresh = useSelector(state => state.auth.isRefreshing);
 
-  // const [filter, setFilter] = useState('');
+  useEffect(() => {
+    dispatch(refreshUser());
+  }, [dispatch]);
 
-  // useEffect(() => {
-  //   window.localStorage.setItem('contacts', JSON.stringify(contacts));
-  // }, [contacts]);
+  if (isrefresh === undefined) {
+    return <div>Liading</div>;
+  } else {
+    return (
+      <Routes>
+        <Route path="/" element={<SharedLayout />}>
+          <Route index element={<Home />} />
 
-  // const handleChangeFilter = event => {
-  //   setFilter(event.target.value);
-  // };
+          <Route
+            path="/registration"
+            element={
+              <RestrictedRoute redirectTo="/contacts" component={<SignUp />} />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <RestrictedRoute redirectTo="/contacts" component={<Login />} />
+            }
+          />
 
-  // const addContacts = (id, name, number) => {
-  //   if (contacts.find(contact => contact.name === name) !== undefined) {
-  //     Notiflix.Notify.failure(`${name} is already in your contact book`);
-  //     return;
-  //   }
-
-  //   setContacts(prevState => [{ id, name, number }, ...prevState]);
-  //   Notiflix.Notify.success(`You add ${name} to your phonebook`);
-  // };
-
-  // const visibleContacts = useMemo(() => {
-  //   const filterNormalize = filter.toLowerCase();
-  //   const visibleContacts = filter
-  //     ? contacts.filter(contact =>
-  //         contact.name.toLocaleLowerCase().includes(filterNormalize)
-  //       )
-  //     : contacts;
-  //   return visibleContacts;
-  // }, [contacts, filter]);
-
-  // const handleDeleteContact = event => {
-  //   const deleteSelectContact = contacts.filter(
-  //     contact => contact.id !== event.target.id
-  //   );
-
-  //   setContacts([...deleteSelectContact]);
-  // };
-
-  return (
-    <div>
-      <h1>My Phonebook</h1>
-      <ContactForm />
-      <ContactFilter />
-      <ContactList />
-    </div>
-  );
-}
+          <Route
+            path="/contacts"
+            element={<PrivateRoute redirectTo="/" component={<Contacts />} />}
+          />
+          <Route path="*" element={<PageNotFound />} />
+        </Route>
+      </Routes>
+    );
+  }
+};
