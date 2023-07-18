@@ -18,14 +18,14 @@ export const Home = () => {
     return (
       <section className={css.sectionHome}>
         <div className={css.homeBox}>
-          <h1>{nameUser.name} are authorized!</h1>
-          <p>you can</p>
+          <h1>{nameUser.name} is authorized!</h1>
+          <p>Now you can</p>
           <div className={css.buttonBox}>
             <button
               className={css.button}
               onClick={() => navigate('/contacts', { replace: true })}
             >
-              Go to Contacts
+              Go to your Contacts
             </button>
             <p className={css.pusher}>or</p>
             <button
